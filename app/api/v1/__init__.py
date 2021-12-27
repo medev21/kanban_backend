@@ -1,5 +1,5 @@
 from fastapi import APIRouter
-from . import boards, cards, lists
+from app.api.v1 import boards, cards, lists
 
 api_router = APIRouter()
 api_router.include_router(boards.router, prefix="/boards", tags=["Boards"])
