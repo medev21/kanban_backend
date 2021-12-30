@@ -1,6 +1,7 @@
 from typing import Dict, List
 from .session import database
 from .db_helpers import board_helper
+from bson import ObjectId
 
 board_collection = database.boardstest
 
@@ -15,7 +16,27 @@ async def fetch_boards() -> List[Dict[str, str]]:
     return boards_list
 
 
-async def add_board(board: dict) -> Dict[str, str]:
+async def insert_board(board: dict) -> Dict[str, str]:
     insert_response = await board_collection.insert_one(board)
     new_board_dict = await board_collection.find_one(insert_response.inserted_id)
     return board_helper(new_board_dict)
+
+
+async def edit_board(board: dict) -> Dict[str, str]:
+    try:
+        board_id = board["id"]
+        ObjectId(board_id)  # check if id is valid
+
+        board_found = await board_collection.find_one({"_id": ObjectId(board_id)})
+        if board_found:
+            await board_collection.update_one(
+                {"_id": ObjectId(board_id)},
+                {"$set": board},
+            )
+            updated_board = await board_collection.find_one(
+                {"_id": ObjectId(board["id"])},
+            )
+            return board_helper(updated_board)
+    except Exception:
+        # TODO: return as an object, with status code
+        raise TypeError("ID is invalid")
