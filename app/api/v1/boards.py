@@ -1,7 +1,8 @@
 from typing import Dict, List
 from fastapi import APIRouter, HTTPException
-from app.database.boards import insert_board, edit_board, fetch_boards
+from app.database.boards import insert_board, edit_board, fetch_boards, remove_board
 from app.models.board import Board, UpdateBoard
+from app.models.base_class import ResponseModel
 
 router = APIRouter()
 
@@ -26,11 +27,16 @@ async def update_board(board: UpdateBoard) -> Dict:
     response = await edit_board(board.dict())
     if response:
         return response
-    raise HTTPException(404, "There is no board to update")
+    raise HTTPException(404, "There is no board to update!")
 
 
-"""
-@router.delete("/delete", response_description="Board Deleted!")
-async def delete_board(id: int) -> Dict:
-    return True
-"""
+@router.delete(
+    "/delete/{board_id}",
+    response_model=ResponseModel,
+    response_description="Board Deleted!",
+)
+async def delete_board(board_id: str):
+    response = await remove_board(board_id)
+    if response:
+        return response
+    raise HTTPException(404, "There is no board to delete!")

@@ -40,3 +40,22 @@ async def edit_board(board: dict) -> Dict[str, str]:
     except Exception:
         # TODO: return as an object, with status code
         raise TypeError("ID is invalid")
+
+
+async def remove_board(board_id: str) -> Dict:
+    board_object_id = set_object_id(board_id)
+    removal_response = await board_collection.delete_one({"_id": board_object_id})
+    if removal_response.deleted_count:
+        response_obj = dict(status=200, message="Board has been deleted")
+        return response_obj
+
+    return False
+
+
+# TODO: put this into a library file
+def set_object_id(id_param: str) -> ObjectId:
+    try:
+        object_id = ObjectId(id_param)
+        return object_id
+    except Exception:
+        raise TypeError("ID is not valid!")
