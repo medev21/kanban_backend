@@ -22,8 +22,12 @@ async def create_board(board: Board) -> Dict:
     raise HTTPException(400, "Something went wrong creating the board")
 
 
-@router.put("/update", response_description="Board Update!")
-async def update_board(board: UpdateBoard) -> Dict:
+@router.put(
+    "/update",
+    response_model=ResponseModel,
+    response_description="Board Update!",
+)
+async def update_board(board: UpdateBoard):
     response = await edit_board(board.dict())
     if response:
         return response

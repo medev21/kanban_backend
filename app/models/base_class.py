@@ -1,6 +1,6 @@
 from datetime import datetime
 from pydantic import BaseModel, Field
-from typing import Optional
+from typing import Dict, List, Optional, Union
 
 
 class Base(BaseModel):
@@ -8,6 +8,6 @@ class Base(BaseModel):
 
 
 class ResponseModel(BaseModel):
-    data: bytes = None
+    data: Union[Dict, List] = None
     status: int
     message: str

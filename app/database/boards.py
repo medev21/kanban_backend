@@ -1,7 +1,6 @@
-from typing import Dict, List
+from typing import Dict, List, Union
 from .session import database
-from .db_helpers import board_helper
-from bson import ObjectId
+from .db_helpers import board_helper, set_object_id
 
 board_collection = database.boardstest
 
@@ -22,40 +21,27 @@ async def insert_board(board: dict) -> Dict[str, str]:
     return board_helper(new_board_dict)
 
 
-async def edit_board(board: dict) -> Dict[str, str]:
-    try:
-        board_id = board["id"]
-        ObjectId(board_id)  # check if id is valid
-
-        board_found = await board_collection.find_one({"_id": ObjectId(board_id)})
-        if board_found:
-            await board_collection.update_one(
-                {"_id": ObjectId(board_id)},
-                {"$set": board},
-            )
-            updated_board = await board_collection.find_one(
-                {"_id": ObjectId(board["id"])},
-            )
-            return board_helper(updated_board)
-    except Exception:
-        # TODO: return as an object, with status code
-        raise TypeError("ID is invalid")
+async def edit_board(board: dict) -> Union[Dict, bool]:
+    board_object_id = set_object_id(board["id"])
+    edit_response = await board_collection.update_one(
+        {"_id": board_object_id},
+        {"$set": {"title": board["title"]}},
+    )
+    if edit_response.modified_count:
+        modified_board = await board_collection.find_one({"_id": board_object_id})
+        response_obj = dict(
+            data=board_helper(modified_board),
+            message="Board updated!",
+            status=200,
+        )
+        return response_obj
+    return False
 
 
-async def remove_board(board_id: str) -> Dict:
+async def remove_board(board_id: str) -> Union[Dict, bool]:
     board_object_id = set_object_id(board_id)
     removal_response = await board_collection.delete_one({"_id": board_object_id})
     if removal_response.deleted_count:
         response_obj = dict(status=200, message="Board has been deleted")
         return response_obj
-
     return False
-
-
-# TODO: put this into a library file
-def set_object_id(id_param: str) -> ObjectId:
-    try:
-        object_id = ObjectId(id_param)
-        return object_id
-    except Exception:
-        raise TypeError("ID is not valid!")
