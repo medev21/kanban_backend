@@ -7,7 +7,14 @@ class Base(BaseModel):
     created_date: Optional[datetime] = Field(default_factory=datetime.utcnow())
 
 
-class ResponseModel(BaseModel):
-    data: Union[Dict, List] = None
+class ResponseBase(BaseModel):
     status: int
     message: str
+
+
+class ResponseModel(ResponseBase):
+    data: Union[Dict, List] = None
+
+
+class ErrorResponseModel(ResponseBase):
+    error: str
