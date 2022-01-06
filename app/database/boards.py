@@ -1,6 +1,6 @@
 from typing import Dict, List, Union
 from .session import database
-from .db_helpers import board_helper, set_object_id
+from .db_helpers import response_helper, set_object_id
 
 board_collection = database.boardstest
 
@@ -10,7 +10,7 @@ async def fetch_boards() -> List[Dict[str, str]]:
     boards_result = board_collection.find()
 
     async for board in boards_result:
-        boards_list.append(board_helper(board))
+        boards_list.append(response_helper(board))
 
     return boards_list
 
@@ -18,7 +18,7 @@ async def fetch_boards() -> List[Dict[str, str]]:
 async def insert_board(board: dict) -> Dict[str, str]:
     insert_response = await board_collection.insert_one(board)
     new_board_dict = await board_collection.find_one(insert_response.inserted_id)
-    return board_helper(new_board_dict)
+    return response_helper(new_board_dict)
 
 
 async def edit_board(board: dict) -> Union[Dict, bool]:
@@ -30,7 +30,7 @@ async def edit_board(board: dict) -> Union[Dict, bool]:
     if edit_response.modified_count:
         modified_board = await board_collection.find_one({"_id": board_object_id})
         response_obj = dict(
-            data=board_helper(modified_board),
+            data=response_helper(modified_board),
             message="Board updated!",
             status=200,
         )
