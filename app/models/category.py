@@ -3,6 +3,7 @@ from pydantic import BaseModel
 
 
 class Category(Base):
+    board_id: str
     title: str
 
 
